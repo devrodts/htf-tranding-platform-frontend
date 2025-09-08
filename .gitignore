@@ -1,0 +1,7 @@
+node_modules/
+cpp-hft-trading-system/
+how_to_develop/
+infrastructure/
+project_documentation/
+.claude
+PRODUCTION_READINESS_REPORT.md
