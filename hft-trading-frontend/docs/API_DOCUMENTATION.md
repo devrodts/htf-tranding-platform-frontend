@@ -1,11 +1,3 @@
-# HFT Trading Platform - API Documentation
-
-**Version:** 1.0.0  
-**Last Updated:** 2025-09-08  
-**Classification:** CONFIDENTIAL - Internal Use Only  
-
----
-
 ## Overview
 
 The HFT Trading Platform Frontend provides a comprehensive REST API and WebSocket interface for ultra-low latency trading operations. This documentation covers all available endpoints, data structures, and integration patterns.
@@ -690,24 +682,3 @@ All API calls are logged with:
 - Timestamp (microsecond precision)
 - Source IP address
 - Request outcome
-
----
-
-## Support & Resources
-
-### Documentation Links
-
-- [Architecture Overview](./ARCHITECTURE.md)
-- [Component Documentation](./COMPONENTS.md)  
-- [WebSocket Integration](./WEBSOCKET.md)
-- [Deployment Guide](./DEPLOYMENT.md)
-
-### Contact Information
-
-**Technical Support:** support@hft-platform.com  
-**API Issues:** api-support@hft-platform.com  
-**Emergency Contact:** +1-555-HFT-HELP  
-
----
-
-*This documentation is continuously updated. Last revision: 2025-09-08*
