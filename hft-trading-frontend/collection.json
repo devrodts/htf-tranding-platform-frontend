@@ -1,0 +1,1108 @@
+{
+  "info": {
+    "name": "HFT Trading Platform API",
+    "description": "Comprehensive API collection for High-Frequency Trading Platform - Enterprise-grade testing suite with ultra-low latency endpoints",
+    "version": "1.0.0",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "contact": {
+      "name": "HFT Development Team",
+      "email": "api-support@hft-platform.com"
+    },
+    "license": {
+      "name": "Proprietary",
+      "url": "https://hft-platform.com/license"
+    }
+  },
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{jwt_token}}",
+        "type": "string"
+      }
+    ]
+  },
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://localhost:3000/api",
+      "type": "string"
+    },
+    {
+      "key": "cpp_backend_url",
+      "value": "http://localhost:8080/api",
+      "type": "string"
+    },
+    {
+      "key": "websocket_url",
+      "value": "ws://localhost:8081/ws",
+      "type": "string"
+    },
+    {
+      "key": "jwt_token",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "refresh_token",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "user_id",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "order_id",
+      "value": "",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "Authentication",
+      "description": "JWT-based authentication endpoints with 2FA support",
+      "item": [
+        {
+          "name": "Login",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "X-API-Version",
+                "value": "1.0"
+              },
+              {
+                "key": "X-Client-ID",
+                "value": "postman-client"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"trader@institution.com\",\n  \"password\": \"SecureTrading2025!\",\n  \"twoFactorCode\": \"123456\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/auth/login",
+              "host": ["{{base_url}}"],
+              "path": ["auth", "login"]
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Login successful', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('Response has access token', function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.success).to.be.true;",
+                  "    pm.expect(jsonData.data.accessToken).to.exist;",
+                  "    pm.collectionVariables.set('jwt_token', jsonData.data.accessToken);",
+                  "    pm.collectionVariables.set('refresh_token', jsonData.data.refreshToken);",
+                  "    pm.collectionVariables.set('user_id', jsonData.data.user.id);",
+                  "});",
+                  "",
+                  "pm.test('Token expiry is valid', function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.data.expiresIn).to.be.above(0);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "Refresh Token",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"refreshToken\": \"{{refresh_token}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/auth/refresh",
+              "host": ["{{base_url}}"],
+              "path": ["auth", "refresh"]
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Token refresh successful', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('New access token received', function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.data.accessToken).to.exist;",
+                  "    pm.collectionVariables.set('jwt_token', jsonData.data.accessToken);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "Logout",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{jwt_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/auth/logout",
+              "host": ["{{base_url}}"],
+              "path": ["auth", "logout"]
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Logout successful', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Market Data",
+      "description": "Real-time market data endpoints with Level 1/2 quotes",
+      "item": [
+        {
+          "name": "Get Trading Symbols",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/market-data/symbols?limit=20&exchange=NASDAQ",
+              "host": ["{{base_url}}"],
+              "path": ["market-data", "symbols"],
+              "query": [
+                {
+                  "key": "limit",
+                  "value": "20"
+                },
+                {
+                  "key": "exchange",
+                  "value": "NASDAQ"
+                }
+              ]
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Symbols retrieved successfully', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('Response contains symbol data', function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.success).to.be.true;",
+                  "    pm.expect(jsonData.data).to.be.an('array');",
+                  "    pm.expect(jsonData.data.length).to.be.above(0);",
+                  "});",
+                  "",
+                  "pm.test('Symbol structure is valid', function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    var symbol = jsonData.data[0];",
+                  "    pm.expect(symbol.symbol).to.exist;",
+                  "    pm.expect(symbol.name).to.exist;",
+                  "    pm.expect(symbol.exchange).to.exist;",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "Get Quote (AAPL)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/market-data/quotes/AAPL",
+              "host": ["{{base_url}}"],
+              "path": ["market-data", "quotes", "AAPL"]
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Quote retrieved successfully', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('Quote data is valid', function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.data.symbol).to.eql('AAPL');",
+                  "    pm.expect(jsonData.data.bid).to.be.a('number');",
+                  "    pm.expect(jsonData.data.ask).to.be.a('number');",
+                  "    pm.expect(jsonData.data.last).to.be.a('number');",
+                  "});",
+                  "",
+                  "pm.test('Bid-Ask spread is reasonable', function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    var spread = jsonData.data.ask - jsonData.data.bid;",
+                  "    pm.expect(spread).to.be.above(0);",
+                  "    pm.expect(spread).to.be.below(1.0);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "Get Market Depth (Level 2)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/market-data/depth/AAPL",
+              "host": ["{{base_url}}"],
+              "path": ["market-data", "depth", "AAPL"]
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Market depth retrieved successfully', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('Depth data structure is valid', function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.data.bids).to.be.an('array');",
+                  "    pm.expect(jsonData.data.asks).to.be.an('array');",
+                  "});",
+                  "",
+                  "pm.test('Bid/Ask levels have required fields', function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    if (jsonData.data.bids.length > 0) {",
+                  "        var bid = jsonData.data.bids[0];",
+                  "        pm.expect(bid.price).to.be.a('number');",
+                  "        pm.expect(bid.size).to.be.a('number');",
+                  "    }",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "C++ Backend - Market Data",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{cpp_backend_url}}/market-data",
+              "host": ["{{cpp_backend_url}}"],
+              "path": ["market-data"]
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('C++ backend responds', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('Response time is acceptable', function () {",
+                  "    pm.expect(pm.response.responseTime).to.be.below(100);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Trading",
+      "description": "Order management and execution endpoints",
+      "item": [
+        {
+          "name": "Get Portfolio",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/trading/portfolio",
+              "host": ["{{base_url}}"],
+              "path": ["trading", "portfolio"]
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Portfolio retrieved successfully', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('Portfolio has required fields', function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.data.totalValue).to.be.a('number');",
+                  "    pm.expect(jsonData.data.cash).to.be.a('number');",
+                  "    pm.expect(jsonData.data.positions).to.be.an('array');",
+                  "});",
+                  "",
+                  "pm.test('Financial calculations are consistent', function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    var portfolio = jsonData.data;",
+                  "    pm.expect(portfolio.totalValue).to.eql(portfolio.cash + portfolio.investedValue);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "Create Market Order (BUY)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"symbol\": \"AAPL\",\n  \"side\": \"BUY\",\n  \"orderType\": \"MARKET\",\n  \"quantity\": 100,\n  \"timeInForce\": \"IOC\",\n  \"clientOrderId\": \"TEST_ORDER_{{$randomUUID}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/trading/orders",
+              "host": ["{{base_url}}"],
+              "path": ["trading", "orders"]
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Order created successfully', function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});",
+                  "",
+                  "pm.test('Order ID is returned', function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.data.orderId).to.exist;",
+                  "    pm.collectionVariables.set('order_id', jsonData.data.orderId);",
+                  "});",
+                  "",
+                  "pm.test('Order status is valid', function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    var validStatuses = ['PENDING_NEW', 'NEW', 'PARTIALLY_FILLED', 'FILLED'];",
+                  "    pm.expect(validStatuses).to.include(jsonData.data.status);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "Create Limit Order (SELL)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"symbol\": \"GOOGL\",\n  \"side\": \"SELL\",\n  \"orderType\": \"LIMIT\",\n  \"quantity\": 10,\n  \"price\": 2850.00,\n  \"timeInForce\": \"DAY\",\n  \"clientOrderId\": \"LIMIT_SELL_{{$randomUUID}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/trading/orders",
+              "host": ["{{base_url}}"],
+              "path": ["trading", "orders"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Create VWAP Algorithm Order",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"symbol\": \"MSFT\",\n  \"side\": \"BUY\",\n  \"orderType\": \"ALGORITHM\",\n  \"quantity\": 1000,\n  \"timeInForce\": \"DAY\",\n  \"clientOrderId\": \"VWAP_{{$randomUUID}}\",\n  \"algorithmParams\": {\n    \"strategy\": \"VWAP\",\n    \"participationRate\": 0.1,\n    \"maxOrderSize\": 100,\n    \"timeHorizon\": 3600\n  }\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/trading/orders",
+              "host": ["{{base_url}}"],
+              "path": ["trading", "orders"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Orders",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/trading/orders?limit=50&status=NEW",
+              "host": ["{{base_url}}"],
+              "path": ["trading", "orders"],
+              "query": [
+                {
+                  "key": "limit",
+                  "value": "50"
+                },
+                {
+                  "key": "status",
+                  "value": "NEW"
+                }
+              ]
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Orders retrieved successfully', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('Orders list is valid', function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.data).to.be.an('array');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "Modify Order",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"quantity\": 150,\n  \"price\": 174.50\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/trading/orders/{{order_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["trading", "orders", "{{order_id}}"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Cancel Order",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/trading/orders/{{order_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["trading", "orders", "{{order_id}}"]
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Order cancelled successfully', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "C++ Backend - Portfolio",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{cpp_backend_url}}/portfolio",
+              "host": ["{{cpp_backend_url}}"],
+              "path": ["portfolio"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Risk Management",
+      "description": "Risk limits and compliance monitoring",
+      "item": [
+        {
+          "name": "Get Risk Limits",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/risk/limits",
+              "host": ["{{base_url}}"],
+              "path": ["risk", "limits"]
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Risk limits retrieved successfully', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('Risk limits structure is valid', function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.data.limits).to.exist;",
+                  "    pm.expect(jsonData.data.current).to.exist;",
+                  "});",
+                  "",
+                  "pm.test('Risk metrics are within limits', function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    var data = jsonData.data;",
+                  "    pm.expect(data.current.leverage).to.be.at.most(data.limits.maxLeverage);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "Validate Order Risk",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"symbol\": \"TSLA\",\n  \"side\": \"BUY\",\n  \"quantity\": 500,\n  \"price\": 800.00,\n  \"orderType\": \"LIMIT\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/risk/validate-order",
+              "host": ["{{base_url}}"],
+              "path": ["risk", "validate-order"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Analytics",
+      "description": "Performance analytics and reporting",
+      "item": [
+        {
+          "name": "Get Performance Metrics",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/analytics/performance?period=1M&metrics=totalReturn,sharpeRatio,maxDrawdown",
+              "host": ["{{base_url}}"],
+              "path": ["analytics", "performance"],
+              "query": [
+                {
+                  "key": "period",
+                  "value": "1M"
+                },
+                {
+                  "key": "metrics",
+                  "value": "totalReturn,sharpeRatio,maxDrawdown"
+                }
+              ]
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Performance metrics retrieved', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('Metrics are valid numbers', function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    var metrics = jsonData.data.metrics;",
+                  "    pm.expect(metrics.totalReturn).to.be.a('number');",
+                  "    pm.expect(metrics.sharpeRatio).to.be.a('number');",
+                  "    pm.expect(metrics.maxDrawdown).to.be.a('number');",
+                  "});",
+                  "",
+                  "pm.test('Sharpe ratio is reasonable', function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    var sharpe = jsonData.data.metrics.sharpeRatio;",
+                  "    pm.expect(sharpe).to.be.above(-5);",
+                  "    pm.expect(sharpe).to.be.below(10);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "Get Trade History",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/analytics/trades?startDate=2025-08-01&endDate=2025-09-08&symbol=AAPL",
+              "host": ["{{base_url}}"],
+              "path": ["analytics", "trades"],
+              "query": [
+                {
+                  "key": "startDate",
+                  "value": "2025-08-01"
+                },
+                {
+                  "key": "endDate",
+                  "value": "2025-09-08"
+                },
+                {
+                  "key": "symbol",
+                  "value": "AAPL"
+                }
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "System Health",
+      "description": "System monitoring and health checks",
+      "item": [
+        {
+          "name": "Health Check - Frontend",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/health",
+              "host": ["{{base_url}}"],
+              "path": ["health"]
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Health check returns OK', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('All services are healthy', function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.status).to.eql('healthy');",
+                  "});",
+                  "",
+                  "pm.test('Response time is acceptable', function () {",
+                  "    pm.expect(pm.response.responseTime).to.be.below(1000);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "Health Check - C++ Backend",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{cpp_backend_url}}/health",
+              "host": ["{{cpp_backend_url}}"],
+              "path": ["health"]
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('C++ backend is healthy', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('Ultra-low latency response', function () {",
+                  "    pm.expect(pm.response.responseTime).to.be.below(50);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "Get System Metrics",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/metrics",
+              "host": ["{{base_url}}"],
+              "path": ["metrics"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Trading Engine Status",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/system/trading-engine/status",
+              "host": ["{{base_url}}"],
+              "path": ["system", "trading-engine", "status"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Load Testing",
+      "description": "Performance and stress testing endpoints",
+      "item": [
+        {
+          "name": "Concurrent Market Data Requests",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/market-data/quotes/AAPL",
+              "host": ["{{base_url}}"],
+              "path": ["market-data", "quotes", "AAPL"]
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Response time under load', function () {",
+                  "    pm.expect(pm.response.responseTime).to.be.below(100);",
+                  "});",
+                  "",
+                  "pm.test('No errors under concurrent load', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "Burst Order Creation",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"symbol\": \"AAPL\",\n  \"side\": \"BUY\",\n  \"orderType\": \"MARKET\",\n  \"quantity\": 1,\n  \"timeInForce\": \"IOC\",\n  \"clientOrderId\": \"BURST_{{$randomUUID}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/trading/orders",
+              "host": ["{{base_url}}"],
+              "path": ["trading", "orders"]
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Order processing under load', function () {",
+                  "    pm.expect(pm.response.responseTime).to.be.below(200);",
+                  "});",
+                  "",
+                  "pm.test('Orders accepted during burst', function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          "// Global pre-request script",
+          "console.log('Executing request to:', pm.request.url.toString());",
+          "",
+          "// Add request timestamp for latency measurement",
+          "pm.globals.set('requestStartTime', Date.now());"
+        ]
+      }
+    },
+    {
+      "listen": "test",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          "// Global test script for all requests",
+          "",
+          "// Calculate request latency",
+          "const startTime = pm.globals.get('requestStartTime');",
+          "if (startTime) {",
+          "    const latency = Date.now() - startTime;",
+          "    console.log('Request latency:', latency + 'ms');",
+          "    pm.globals.unset('requestStartTime');",
+          "}",
+          "",
+          "// Common response structure validation",
+          "pm.test('Response has correct content-type', function () {",
+          "    if (pm.response.headers.get('content-type')) {",
+          "        pm.expect(pm.response.headers.get('content-type')).to.include('application/json');",
+          "    }",
+          "});",
+          "",
+          "// Rate limiting headers validation",
+          "pm.test('Rate limit headers present', function () {",
+          "    if (pm.response.headers.get('x-ratelimit-limit')) {",
+          "        pm.expect(pm.response.headers.get('x-ratelimit-limit')).to.exist;",
+          "        pm.expect(pm.response.headers.get('x-ratelimit-remaining')).to.exist;",
+          "    }",
+          "});",
+          "",
+          "// Log response time for performance monitoring",
+          "console.log('Response time:', pm.response.responseTime + 'ms');"
+        ]
+      }
+    }
+  ]
+}

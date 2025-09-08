@@ -1,0 +1,347 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 0 0% 100%;
+    --foreground: 222.2 84% 4.9%;
+    --card: 0 0% 100%;
+    --card-foreground: 222.2 84% 4.9%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 222.2 84% 4.9%;
+    --primary: 221.2 83.2% 53.3%;
+    --primary-foreground: 210 40% 98%;
+    --secondary: 210 40% 96%;
+    --secondary-foreground: 222.2 84% 4.9%;
+    --muted: 210 40% 96%;
+    --muted-foreground: 215.4 16.3% 46.9%;
+    --accent: 210 40% 96%;
+    --accent-foreground: 222.2 84% 4.9%;
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 210 40% 98%;
+    --border: 214.3 31.8% 91.4%;
+    --input: 214.3 31.8% 91.4%;
+    --ring: 221.2 83.2% 53.3%;
+    --radius: 0.5rem;
+    
+    /* Trading specific variables */
+    --bull-50: 134 61% 95%;
+    --bull-100: 134 61% 89%;
+    --bull-500: 134 61% 41%;
+    --bull-600: 134 61% 35%;
+    --bull-700: 134 61% 29%;
+    
+    --bear-50: 0 86% 97%;
+    --bear-100: 0 86% 94%;
+    --bear-500: 0 86% 58%;
+    --bear-600: 0 86% 52%;
+    --bear-700: 0 86% 46%;
+    
+    --warning-500: 45 93% 47%;
+    --warning-600: 45 93% 41%;
+    --warning-700: 45 93% 35%;
+  }
+
+  .dark {
+    --background: 222.2 84% 4.9%;
+    --foreground: 210 40% 98%;
+    --card: 222.2 84% 4.9%;
+    --card-foreground: 210 40% 98%;
+    --popover: 222.2 84% 4.9%;
+    --popover-foreground: 210 40% 98%;
+    --primary: 217.2 91.2% 59.8%;
+    --primary-foreground: 222.2 84% 4.9%;
+    --secondary: 217.2 32.6% 17.5%;
+    --secondary-foreground: 210 40% 98%;
+    --muted: 217.2 32.6% 17.5%;
+    --muted-foreground: 215 20.2% 65.1%;
+    --accent: 217.2 32.6% 17.5%;
+    --accent-foreground: 210 40% 98%;
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 210 40% 98%;
+    --border: 217.2 32.6% 17.5%;
+    --input: 217.2 32.6% 17.5%;
+    --ring: 224.3 76.3% 94.1%;
+    
+    /* Dark mode trading colors */
+    --bull-50: 134 25% 15%;
+    --bull-100: 134 25% 20%;
+    --bull-500: 134 50% 45%;
+    --bull-600: 134 50% 50%;
+    --bull-700: 134 50% 55%;
+    
+    --bear-50: 0 40% 15%;
+    --bear-100: 0 40% 20%;
+    --bear-500: 0 70% 50%;
+    --bear-600: 0 70% 55%;
+    --bear-700: 0 70% 60%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  
+  body {
+    @apply bg-background text-foreground;
+    font-feature-settings: "rlig" 1, "calt" 1;
+  }
+  
+  /* Trading specific typography */
+  .font-mono {
+    font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+    font-variant-numeric: tabular-nums;
+  }
+  
+  /* Custom scrollbar for trading widgets */
+  .trading-scrollbar {
+    scrollbar-width: thin;
+    scrollbar-color: hsl(var(--muted)) hsl(var(--background));
+  }
+  
+  .trading-scrollbar::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  
+  .trading-scrollbar::-webkit-scrollbar-track {
+    background: hsl(var(--muted) / 0.3);
+    border-radius: 3px;
+  }
+  
+  .trading-scrollbar::-webkit-scrollbar-thumb {
+    background: hsl(var(--muted-foreground) / 0.5);
+    border-radius: 3px;
+  }
+  
+  .trading-scrollbar::-webkit-scrollbar-thumb:hover {
+    background: hsl(var(--muted-foreground) / 0.7);
+  }
+}
+
+@layer components {
+  /* Trading specific component styles */
+  .trading-card {
+    @apply bg-card border border-border rounded-lg shadow-sm;
+  }
+  
+  .trading-input {
+    @apply w-full px-3 py-2 text-sm border border-input bg-background rounded-md;
+    @apply focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent;
+    @apply disabled:cursor-not-allowed disabled:opacity-50;
+  }
+  
+  .price-positive {
+    @apply text-bull-600;
+  }
+  
+  .price-negative {
+    @apply text-bear-600;
+  }
+  
+  .price-neutral {
+    @apply text-muted-foreground;
+  }
+  
+  /* Order book specific styles */
+  .orderbook-row {
+    @apply flex items-center justify-between px-2 py-1 text-xs hover:bg-muted/30 cursor-pointer;
+    @apply transition-colors duration-150;
+  }
+  
+  .orderbook-bid {
+    @apply border-l-2 border-bull-500/20;
+  }
+  
+  .orderbook-ask {
+    @apply border-r-2 border-bear-500/20;
+  }
+  
+  .orderbook-size-bar {
+    @apply absolute inset-y-0 opacity-10 transition-all duration-300;
+  }
+  
+  .orderbook-size-bar.bid {
+    @apply right-0 bg-bull-500;
+  }
+  
+  .orderbook-size-bar.ask {
+    @apply left-0 bg-bear-500;
+  }
+  
+  /* Chart container */
+  .chart-container {
+    @apply w-full h-full min-h-[400px] relative overflow-hidden rounded-lg;
+  }
+  
+  /* Status indicators */
+  .status-indicator {
+    @apply inline-flex items-center px-2 py-1 rounded-full text-xs font-medium;
+  }
+  
+  .status-connected {
+    @apply bg-bull-100 text-bull-800;
+  }
+  
+  .status-disconnected {
+    @apply bg-bear-100 text-bear-800;
+  }
+  
+  .status-connecting {
+    @apply bg-warning-100 text-warning-800;
+  }
+  
+  /* Performance optimizations for trading data */
+  .trading-table {
+    @apply table-auto w-full text-sm;
+    contain: layout style paint;
+  }
+  
+  .trading-table tbody {
+    contain: layout style;
+  }
+  
+  .trading-table tr {
+    @apply border-b border-border/30;
+    contain: layout;
+  }
+  
+  .trading-table td {
+    @apply px-3 py-2 font-mono;
+    contain: layout style;
+  }
+  
+  /* Animations for trading updates */
+  @keyframes price-flash-up {
+    0% { background-color: hsl(var(--bull-500) / 0.3); }
+    100% { background-color: transparent; }
+  }
+  
+  @keyframes price-flash-down {
+    0% { background-color: hsl(var(--bear-500) / 0.3); }
+    100% { background-color: transparent; }
+  }
+  
+  .price-flash-up {
+    animation: price-flash-up 0.5s ease-out;
+  }
+  
+  .price-flash-down {
+    animation: price-flash-down 0.5s ease-out;
+  }
+}
+
+@layer utilities {
+  /* Trading specific utilities */
+  .text-2xs {
+    font-size: 0.6875rem; /* 11px */
+    line-height: 0.875rem; /* 14px */
+  }
+  
+  .h-fit {
+    height: fit-content;
+  }
+  
+  .min-h-trading {
+    min-height: calc(100vh - 4rem); /* Account for header */
+  }
+  
+  /* Layout utilities for trading widgets */
+  .widget-grid {
+    display: grid;
+    gap: 1.5rem;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  }
+  
+  .widget-grid-2 {
+    display: grid;
+    gap: 1.5rem;
+    grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+  }
+  
+  .widget-grid-3 {
+    display: grid;
+    gap: 1.5rem;
+    grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+  }
+  
+  /* Hide scrollbars but maintain functionality */
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+  
+  /* Responsive text sizes for trading data */
+  @screen sm {
+    .text-trading-sm {
+      font-size: 0.75rem;
+    }
+  }
+  
+  @screen md {
+    .text-trading-md {
+      font-size: 0.875rem;
+    }
+  }
+  
+  @screen lg {
+    .text-trading-lg {
+      font-size: 1rem;
+    }
+  }
+}
+
+/* Print styles for trading reports */
+@media print {
+  .no-print {
+    display: none !important;
+  }
+  
+  .trading-card {
+    box-shadow: none !important;
+    border: 1px solid #ddd !important;
+  }
+  
+  .price-positive,
+  .price-negative {
+    color: #000 !important;
+  }
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  .trading-card {
+    border-width: 2px;
+  }
+  
+  .price-positive {
+    font-weight: 600;
+  }
+  
+  .price-negative {
+    font-weight: 600;
+  }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  .price-flash-up,
+  .price-flash-down,
+  .animate-pulse,
+  .animate-bounce-subtle,
+  .animate-glow {
+    animation: none !important;
+  }
+  
+  .transition-all,
+  .transition-colors,
+  .transition-transform {
+    transition: none !important;
+  }
+}
