@@ -1260,7 +1260,3 @@ Component.displayName = 'Component';
 
 export { Component };
 ```
-
----
-
-*Documentation maintained by the HFT Frontend Team*
